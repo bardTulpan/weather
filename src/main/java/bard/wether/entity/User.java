@@ -2,15 +2,17 @@ package bard.wether.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue
     @Column(name = "id")
-    private Long id;
+    private Integer id;
 
     @Column(name = "login", nullable = false)
     private String login;

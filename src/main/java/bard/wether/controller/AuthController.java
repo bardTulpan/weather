@@ -1,55 +1,36 @@
 package bard.wether.controller;
 
-import bard.wether.entity.Session;
-import bard.wether.entity.User;
-import bard.wether.repository.UserRepository;
+import bard.wether.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
-@RequestMapping("/api/auth")
 @RestController
+@RequestMapping("/api/auth")
 public class AuthController {
+
+    private final AuthService authService;
+
     @Autowired
-    private UserRepository userRepository;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
-    public String register() {
-        return "register";
+    public String register(@RequestParam String username, @RequestParam String password) {
+        return authService.registerUser(username, password);
     }
 
-//    @GetMapping("/login")
-//    public List<User> login() {
-//        User user = userRepository.createTestUser();
-//        Session session = userRepository.createTestSession(user);
-//        userRepository.saveSession(session);
-//        return userRepository.findAll();
-//    }
-
-    @GetMapping("/login")
-    public List<User> login() {
-        try {
-            // 1. Создаем и сохраняем пользователя
-            User user = userRepository.createTestUser();
-            System.out.println("User created with ID: " + user.getId());
-
-            // 2. Создаем сессию для сохраненного пользователя
-            Session session = userRepository.createTestSession(user);
-            System.out.println("Session created with ID: " + session.getId());
-
-            return userRepository.findAll();
-        } catch (Exception e) {
-            System.out.println("Error in login: " + e.getMessage());
-            return userRepository.findAll();
-        }
+    @PostMapping("/login")
+    public String login(@RequestParam String username,
+                        @RequestParam String password,
+                        HttpServletResponse response) {
+        return authService.loginUser(username, password, response);
     }
 
-    @GetMapping("/logout")
-    public String logout() {
-        return "logout";
+    @PostMapping("/logout")
+    public String logout(@CookieValue(value = "SESSION_ID", required = false) String sessionId,
+                         HttpServletResponse response) {
+        return authService.logoutUser(sessionId, response);
     }
 }
